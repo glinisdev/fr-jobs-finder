@@ -1,0 +1,22 @@
+{
+  "name": "fr-jobs-finder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/glinisdev/fr-jobs-finder.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/glinisdev/fr-jobs-finder/issues"
+  },
+  "homepage": "https://github.com/glinisdev/fr-jobs-finder#readme",
+  "devDependencies": {
+    "typescript": "^5.0.2"
+  }
+}
