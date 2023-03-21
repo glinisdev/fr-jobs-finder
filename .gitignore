@@ -10,7 +10,6 @@ lib-cov
 
 
 docker_run.txt
-**/nodejs_dummy/*
 
 .vscode
 pids
