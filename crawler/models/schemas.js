@@ -1,9 +1,20 @@
 import mongoose from 'mongoose'
 
-const MONGO_URI = `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}`
+const {
+  DB_USER,
+  DB_PASSWORD,
+  DB_HOST,
+  DB_PORT,
+  DB_NAME
+} = process.env
+
+console.log(DB_USER, DB_PASSWORD)
+
+const MONGO_URI = `mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}`
+console.log(MONGO_URI)
 
 mongoose.connect(MONGO_URI, {
-  dbName: process.env.DB_NAME,
+  dbName: DB_NAME,
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
