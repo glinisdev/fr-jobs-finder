@@ -1,19 +1,16 @@
 import mongoose from 'mongoose'
 
-const MONGO_URI = 'mongodb://admin:admin@mongodb:27017'
+const MONGO_URI = 'mongodb://admin:admin@localhost:27017'
 
 mongoose.connect(MONGO_URI, {
   dbName: 'fr-jobs-finder',
   useNewUrlParser: true,
-  useUnifiedTopology: true,
+  useUnifiedTopology: true
 })
 
-mongoose.connection.useDb('fr-jobs-finder')
-
-const db = mongoose.connection
-db.on('error', console.error.bind(console, 'connection error:'))
-db.once('open', function() {
-  console.log('MongoDB connected')
+const userSchema = new mongoose.Schema({
+  chatId: Number,
+  keywords: String
 })
 
 const jobSchema = new mongoose.Schema({
@@ -28,4 +25,11 @@ const jobSchema = new mongoose.Schema({
   postedTime: String
 })
 
+const statusSchema = new mongoose.Schema({
+  portal: String,
+  numberOfCrawledJobs: Number
+})
+
+export const User = mongoose.model('User', userSchema)
 export const Job = mongoose.model('Job', jobSchema)
+export const Status = mongoose.model('Status', statusSchema)

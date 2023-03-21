@@ -8,11 +8,9 @@ lib-cov
 *.gz
 *.swp
 
+# Temporary
+dist
 
-docker_run.txt
-**/nodejs_dummy/*
-
-.vscode
 pids
 logs
 results

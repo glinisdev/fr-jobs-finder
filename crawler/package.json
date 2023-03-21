@@ -6,14 +6,16 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js"
+    "start": "nodemon -L app.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@cliqz/adblocker-puppeteer": "^1.26.2",
     "cheerio": "^1.0.0-rc.12",
     "cron": "^2.3.0",
     "mongoose": "^7.0.2",
+    "nodemon": "^2.0.21",
     "puppeteer": "^19.7.5",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-adblocker": "^2.13.6",

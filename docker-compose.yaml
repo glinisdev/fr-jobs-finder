@@ -9,23 +9,28 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=admin
     ports:
-      - 27017:27017
+      - $MONGODB_LOCAL_PORT:$MONGODB_DOCKER_PORT
     volumes:
       - db:/data/db
   app:
     depends_on:
       - mongodb
-    build: /crawler
+    build:
+      context: crawler
+      dockerfile: Dockerfile
     restart: unless-stopped
     env_file: ./.env
     ports:
-      - 3000:3000
+      - $NODE_LOCAL_PORT:$NODE_DOCKER_PORT
+    volumes:
+      - ./crawler:/crawler
+    working_dir: /crawler
     environment:
       - DB_HOST=mongodb
       - DB_USER=admin
       - DB_PASSWORD=admin
-      - DB_NAME=fr-jobs-finder
-      - DB_PORT=27017
+      - DB_NAME=$MONGODB_DATABASE
+      - DB_PORT=$MONGODB_DOCKER_PORT
     stdin_open: true
     tty: true
 

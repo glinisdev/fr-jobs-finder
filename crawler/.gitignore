@@ -8,11 +8,6 @@ lib-cov
 *.gz
 *.swp
 
-
-docker_run.txt
-**/nodejs_dummy/*
-
-.vscode
 pids
 logs
 results
