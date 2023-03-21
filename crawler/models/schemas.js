@@ -8,10 +8,7 @@ const {
   DB_NAME
 } = process.env
 
-console.log(DB_USER, DB_PASSWORD)
-
 const MONGO_URI = `mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}`
-console.log(MONGO_URI)
 
 mongoose.connect(MONGO_URI, {
   dbName: DB_NAME,
