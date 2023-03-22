@@ -1,13 +1,52 @@
 import TelegramBot from 'node-telegram-bot-api'
-import { User, Job, Status } from './models/index.js'
+import { User, Job } from './models/index.js'
+import express from 'express'
 import * as dotenv from 'dotenv'
+import { checkPattern } from './utils.js'
+import { connect } from './config/db.config.js'
 
 dotenv.config()
 const token = process.env.TOKEN
 
+console.log('starting application...')
+
+connect()
+
 const bot = new TelegramBot(token, { polling: true })
 
-console.log('starting application...')
+const app = express()
+app.use(express.json())
+
+app.post('/api', async (request, response) => {
+  const { crawled } = request.body
+
+  response.send('updated')
+  console.log(crawled)
+
+  const lastJobs = await Job.find().sort({ _id: -1 }).limit(crawled)
+
+  console.log(lastJobs)
+
+  // const searchedKeywords = `(${keywords.join('|')})`
+
+  // const query = {
+  //   $or: [
+  //     { title: { $regex: searchedKeywords, $options: 'i' } },
+  //     { description: { $regex: searchedKeywords, $options: 'i' } }
+  //   ]
+  // }
+
+  // const mathedJobs = await Job.find(query)
+
+  // console.log(mathedJobs[0])
+
+  // bot.sendMessage(chatId, mathedJobs[0].link)
+  // // Search for jobs based on the user's keywords
+  // // and send them to the user
+  // // ...
+
+  // console.log(crawled)
+})
 
 bot.onText(/\/start/, async (msg) => {
   const chatId = msg.chat.id
@@ -17,89 +56,25 @@ bot.onText(/\/start/, async (msg) => {
 })
 
 bot.on('message', async (msg) => {
-  const chatId = msg.chat.id
-  const keywords = msg.text.split(',')
+  const keywordsPattern = /^(([a-zA-Z]+|\d+)(,([a-zA-Z]+|\d+))*)|[a-zA-Z]|\d$/
+  console.log(checkPattern(msg.text, keywordsPattern))
+  if (checkPattern(msg.text, keywordsPattern)) {
+    const chatId = msg.chat.id
+    const keywords = msg.text.split(',')
 
-  const user = new User({ chatId, keywords })
-  await user.save()
+    const user = await User.findOne({ chatId })
 
-  const pattern = `(${keywords.join('|')})`
-
-  const query = {
-    $or: [
-      { title: { $regex: pattern, $options: 'i' } },
-      { description: { $regex: pattern, $options: 'i' } }
-    ]
+    if (!user) {
+      await User.create({ chatId, keywords })
+      bot.sendMessage(msg.chat.id, 'Your keywords have been saved')
+    } else {
+      bot.sendMessage(msg.chat.id, 'Something went wrong. You have already provided keywords')
+    }
+  } else {
+    bot.sendMessage(msg.chat.id, 'You have provided incorrect keywords. \n Please follow pattern: keyword1, keyword2...')
   }
-
-  const mathedJobs = await Job.find(query)
-
-  console.log(mathedJobs[0])
-
-  bot.sendMessage(chatId, mathedJobs[0].link)
-  // Search for jobs based on the user's keywords
-  // and send them to the user
-  // ...
 })
 
-// const TelegramBot = require('node-telegram-bot-api');
-// const express = require('express');
-
-// // Set up your bot token and chat ID
-// const botToken = 'YOUR_BOT_TOKEN';
-// const chatId = 'YOUR_CHAT_ID';
-
-// // Set up your bot
-// const bot = new TelegramBot(botToken, { polling: true });
-
-// // Create an Express app
-// const app = express();
-
-// // Create a route that listens for a POST request
-// app.post('/api', (req, res) => {
-//   // Extract the number from the request body
-//   const number = req.body.number;
-
-//   // Send a message to your Telegram chat
-//   bot.sendMessage(chatId, `Received number: ${number}`);
-
-//   // Send a response back to the API caller
-//   res.send('Number received');
-// });
-
-// // Listen for /start command
-// bot.onText(/\/start/, (msg) => {
-//   bot.sendMessage(msg.chat.id, "Welcome to my bot!");
-// });
-
-// // Listen for /help command
-// bot.onText(/\/help/, (msg) => {
-//   bot.sendMessage(msg.chat.id, "Type /api <number> to send a number to the bot.");
-// });
-
-// // Listen for /api command with a number argument
-// bot.onText(/\/api (.+)/, (msg, match) => {
-//   // Extract the number from the command argument
-//   const number = match[1];
-
-//   // Send a message to the chat
-//   bot.sendMessage(chatId, `Received number: ${number}`);
-// });
-
-// // Start the Express app
-// app.listen(3000, () => {
-//   console.log('Express server started on port 3000');
-// });
-
-// const axios = require('axios');
-
-// const apiUrl = 'http://other_service:3000/api';
-
-// // Make a POST request to the other service
-// axios.post(apiUrl, { number: 42 })
-//   .then(response => {
-//     console.log(response.data);
-//   })
-//   .catch(error => {
-//     console.error(error);
-//   });
+app.listen(4000, () => {
+  console.log('Express server started on port 3000')
+})
