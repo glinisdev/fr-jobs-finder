@@ -3,7 +3,7 @@ import TelegramBot from 'node-telegram-bot-api'
 import { User, Job } from './models/index.js'
 import express from 'express'
 import { connect } from './config/db.config.js'
-import { GET_KEYWORDS, PROVIDE_KEYWORDS, UPDATE_KEYWORDS, TOKEN, inlineKeyboard } from './utils/constants.js'
+import { GET_KEYWORDS, PROVIDE_KEYWORDS, UPDATE_KEYWORDS, TOKEN, inline_keyboard, Status } from './utils/constants.js'
 
 console.log('starting application...')
 
@@ -44,28 +44,28 @@ bot.onText(/\/start/, async (msg) => {
   const chatId = msg.chat.id
 
   await User.deleteMany({ chatId })
-  await User.create({ chatId, context: 'new' })
+  await User.create({ chatId, context: Status.NEW })
 
-  bot.sendMessage(chatId, 'Hello, this is the job finder bot!', { reply_markup: { inlineKeyboard } }).then(function (resp) {
+  bot.sendMessage(chatId, 'Hello, this is the job finder bot!', { reply_markup: { inline_keyboard } }).then(function (resp) {
   }).catch(async function (error) {
     if (error.response && error.response.statusCode === 403) {
       await User.deleteOne({ chatId })
+      console.log('user deleted')
     }
   })
 })
 
 bot.on('callback_query', async (query) => {
   const chatId = query.message.chat.id
-
   const user = await User.findOne({ chatId })
+  if (!user) { throw new Error('no user for this chat id') }
   const context = user.context
 
   switch (query.data) {
     case PROVIDE_KEYWORDS:
 
-      if (context !== 'providing_keywords' && context !== 'updating_keywords' && context !== 'keywords_provided') {
-        const providingContext = 'providing_keywords'
-        await User.updateOne({ chatId }, { $set: { context: providingContext } })
+      if (context !== Status.PROVIDING_KEYWORDS && context !== Status.UPDATING_KEYWORDS && context !== Status.KEYWORDS_PROVIDED) {
+        await User.updateOne({ chatId }, { $set: { context: Status.PROVIDING_KEYWORDS } })
 
         await bot.sendMessage(chatId, 'Please enter 5 keywords for freelance job search. \nFollow this pattern: keyword1, keyword2... (words separated by space and comma)')
 
@@ -76,66 +76,70 @@ bot.on('callback_query', async (query) => {
             const user = await User.findOne({ chatId })
 
             if (user.keywords.length === 0) {
-              await User.updateOne({ chatId }, { $set: { keywords, context: 'keywords_provided' } })
+              await User.updateOne({ chatId }, { $set: { keywords, context: Status.KEYWORDS_PROVIDED } })
 
               await bot.sendMessage(chatId, 'Your keywords have been saved')
             }
           } else {
-            await User.updateOne({ chatId }, { $set: { context: 'keywords_not_provided' } })
+            await User.updateOne({ chatId }, { $set: { context: Status.KEYWORDS_NOT_PROVIDED } })
 
             await bot.sendMessage(chatId, 'More than 5 keywords. \nPlease provide less and follow this pattern: keyword1, keyword2...')
-            await bot.sendMessage(chatId, 'Menu', { reply_markup: { inlineKeyboard } })
+            await bot.sendMessage(chatId, 'Menu', { reply_markup: { inline_keyboard } })
           }
         }
         )
       } else {
-        await bot.sendMessage(chatId, 'You have already provided keywords')
+        if (context === Status.KEYWORDS_PROVIDED) {
+          await bot.sendMessage(chatId, 'You have already provided keywords')
+        } else if (context !== Status.UPDATING_KEYWORDS) {
+          await User.updateOne({ chatId }, { $set: { context: Status.NEW } })
+          await bot.sendMessage(chatId, 'You have not provided keywords')
+        }
       }
       break
 
+    case UPDATE_KEYWORDS:
+
+      if (context !== Status.PROVIDING_KEYWORDS && context !== Status.UPDATING_KEYWORDS && context !== Status.NEW) {
+        await User.updateOne({ chatId }, { $set: { context: Status.UPDATING_KEYWORDS } })
+        await bot.sendMessage(chatId, 'Please enter 5 keywords for freelance job search. \nFollow this pattern: keyword1, keyword2... (words separated by space and comma)')
+
+        await bot.once('message', async (msg) => {
+          const keywords = msg.text.toLowerCase().split(', ')
+
+          if (keywords.length <= 5) {
+            await User.updateOne({ chatId }, { $set: { keywords, context: Status.KEYWORDS_PROVIDED } })
+            await bot.sendMessage(chatId, 'Your keywords have been saved')
+          } else {
+            await User.updateOne({ chatId }, { $set: { context: Status.KEYWORDS_PROVIDED } })
+
+            await bot.sendMessage(chatId, 'More than 5 keywords. \nPlease provide less and follow this pattern: keyword1, keyword2...')
+            await bot.sendMessage(chatId, 'Menu', { reply_markup: { inline_keyboard } })
+          }
+        }
+        )
+      } else {
+        if (context === Status.UPDATING_KEYWORDS) {
+          await bot.sendMessage(chatId, 'You have not provided updated keywords.')
+        } else {
+          await bot.sendMessage(chatId, 'You have not provided keywords. Nothing to update.')
+        }
+      }
+
+      break
+
     case GET_KEYWORDS:
+
       const user = await User.findOne({ chatId })
+
+      if (!user) { throw new Error('no user for this chat id') }
+
       if (user.keywords.length !== 0) {
         await bot.sendMessage(chatId, 'Keywords are using for the search:')
         const keywords = user.keywords.toString()
         await bot.sendMessage(chatId, keywords)
       } else {
         await bot.sendMessage(chatId, 'You have not provided keywords')
-      }
-
-      break
-
-    case UPDATE_KEYWORDS:
-
-      // ADD LOGIC WHILE IAM IN THE PROCESS
-
-      if (context !== 'providing_keywords' && context !== 'updating_keywords' && context !== 'new') {
-        const providingContext = 'updating_keywords'
-
-        await User.updateOne({ chatId }, { $set: { context: providingContext } })
-        await bot.sendMessage(chatId, 'Please enter 5 keywords for freelance job search. \nFollow this pattern: keyword1, keyword2... (words separated by space and comma)')
-
-        await bot.once('message', async (msg) => {
-          const keywords = msg.text.toLowerCase().split(', ')
-
-          if (keywords.length <= 5) {
-            const user = await User.findOne({ chatId })
-
-            if (user.keywords.length === 0) {
-              await User.updateOne({ chatId }, { $set: { keywords, context: 'keywords_provided' } })
-
-              await bot.sendMessage(chatId, 'Your keywords have been saved')
-            }
-          } else {
-            await User.updateOne({ chatId }, { $set: { context: 'keywords_not_provided' } })
-
-            await bot.sendMessage(chatId, 'More than 5 keywords. \nPlease provide less and follow this pattern: keyword1, keyword2...')
-            await bot.sendMessage(chatId, 'Menu', { reply_markup: { inlineKeyboard } })
-          }
-        }
-        )
-      } else {
-        await bot.sendMessage(chatId, 'You have not provided keywords. Nothing to update.')
       }
 
       break

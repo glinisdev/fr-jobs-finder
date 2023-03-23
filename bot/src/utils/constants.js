@@ -2,7 +2,15 @@ export const PROVIDE_KEYWORDS = 'provide.keywords'
 export const GET_KEYWORDS = 'get.keywords'
 export const UPDATE_KEYWORDS = 'update.keywords'
 
-export const inlineKeyboard = [
+export const Status = {
+  NEW: 'new',
+  PROVIDING_KEYWORDS: 'providing.keywords',
+  UPDATING_KEYWORDS: 'updating.keywords',
+  KEYWORDS_PROVIDED: 'keywords.provided'
+  // KEYWORDS_NOT_PROVIDED: 'keywords.not.provided'
+}
+
+export const inline_keyboard = [
   [
     {
       text: 'Provide keywords',
