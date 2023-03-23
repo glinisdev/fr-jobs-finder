@@ -12,7 +12,7 @@ services:
       - $MONGODB_LOCAL_PORT:$MONGODB_DOCKER_PORT
     volumes:
       - db:/data/db
-  app:
+  crawler:
     depends_on:
       - mongodb
     build:
@@ -34,5 +34,27 @@ services:
     stdin_open: true
     tty: true
 
+  bot:
+    depends_on:
+      - mongodb
+    build:
+      context: bot
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: ./.env
+    ports:
+      - $BOT_LOCAL_PORT:$BOT_DOCKER_PORT
+    volumes:
+      - ./bot:/bot
+    working_dir: /bot
+    environment:
+      - DB_HOST=$DB_HOST
+      - DB_USER=$DB_USER
+      - DB_PASSWORD=$DB_PASSWORD
+      - DB_NAME=$DB_NAME
+      - DB_PORT=$DB_PORT
+    stdin_open: true
+    tty: true
+    
 volumes:
   db:
