@@ -2,7 +2,8 @@ import mongoose from 'mongoose'
 
 const userSchema = new mongoose.Schema({
   chatId: Number,
-  keywords: [String]
+  keywords: [String],
+  context: String
 },
 { timestamps: true }
 )

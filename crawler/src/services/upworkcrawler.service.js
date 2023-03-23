@@ -8,16 +8,12 @@ import fetch from 'cross-fetch'
 import { Status } from '../models/status.model.js'
 import { Job } from '../models/job.model.js'
 
-// const auth = 'brd-customer-hl_6e7f1430-zone-scraping_browser:69at2u3pv893'
-
 export async function crawlUpworkJobs () {
   try {
     puppeteer.use(StealthPlugin())
     puppeteer.use(AdblockerPlugin({ blockTrackers: true }))
 
     const browser = await puppeteer.launch({
-
-      // browserWSEndpoint: `wss://${auth}@zproxy.lum-superproxy.io:9222`,
       args: ['--disable-gpu', '--disable-dev-shm-usage', '--disable-setuid-sandbox', '--no-sandbox']
     })
 
