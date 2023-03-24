@@ -3,7 +3,7 @@ import TelegramBot from 'node-telegram-bot-api'
 import { User, Job } from './models/index.js'
 import express from 'express'
 import { connect } from './config/db.config.js'
-import { GET_KEYWORDS, PROVIDE_KEYWORDS, UPDATE_KEYWORDS, TOKEN, inline_keyboard, Status } from './utils/constants.js'
+import { GET_KEYWORDS, PROVIDE_KEYWORDS, UPDATE_KEYWORDS, TOKEN, inline_keyboard, Status, Menu } from './utils/constants.js'
 
 console.log('starting application...')
 
@@ -89,7 +89,7 @@ bot.on('callback_query', async (query) => {
         bot.once('message', async (msg) => {
           const keywords = msg.text.toLowerCase().split(', ')
 
-          if (keywords.length <= 5 && keywords[0] !== '/start') {
+          if (keywords.length <= 5 && !Menu.includes(keywords[0])) {
             const user = await User.findOne({ chatId })
 
             if (user.keywords.length === 0) {
@@ -97,8 +97,8 @@ bot.on('callback_query', async (query) => {
 
               await bot.sendMessage(chatId, 'Your keywords have been saved')
             }
-          } else if (keywords[0] === '/start') {
-            return undefined
+          } else if (Menu.includes(keywords[0])) {
+            await User.updateOne({ chatId }, { $set: { context: Status.NEW } })
           } else {
             await User.updateOne({ chatId }, { $set: { context: Status.NEW } })
 
@@ -125,11 +125,11 @@ bot.on('callback_query', async (query) => {
         bot.once('message', async (msg) => {
           const keywords = msg.text.toLowerCase().split(', ')
 
-          if (keywords.length <= 5 && keywords[0] !== '/start') {
+          if (keywords.length <= 5 && !Menu.includes(keywords[0])) {
             await User.updateOne({ chatId }, { $set: { keywords, context: Status.KEYWORDS_PROVIDED } })
             await bot.sendMessage(chatId, 'Your keywords have been saved')
-          } else if (keywords[0] === '/start') {
-            return undefined
+          } else if (Menu.includes(keywords[0])) {
+            await User.updateOne({ chatId }, { $set: { context: Status.KEYWORDS_PROVIDED } })
           } else {
             await User.updateOne({ chatId }, { $set: { context: Status.KEYWORDS_PROVIDED } })
 

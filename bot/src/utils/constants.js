@@ -9,6 +9,8 @@ export const Status = {
   KEYWORDS_PROVIDED: 'keywords.provided'
 }
 
+export const Menu = ['/start', '/menu']
+
 export const inline_keyboard = [
   [
     {
