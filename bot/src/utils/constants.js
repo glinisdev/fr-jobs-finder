@@ -7,7 +7,6 @@ export const Status = {
   PROVIDING_KEYWORDS: 'providing.keywords',
   UPDATING_KEYWORDS: 'updating.keywords',
   KEYWORDS_PROVIDED: 'keywords.provided'
-  // KEYWORDS_NOT_PROVIDED: 'keywords.not.provided'
 }
 
 export const inline_keyboard = [
