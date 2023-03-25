@@ -10,7 +10,7 @@ const {
 
 mongoose.Promise = global.Promise
 
-const mongoURL = `mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}`
+const mongoURL = `mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/?authSource=admin`
 
 export const connect = () => {
   mongoose.connect(

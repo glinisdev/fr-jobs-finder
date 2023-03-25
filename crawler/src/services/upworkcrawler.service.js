@@ -5,7 +5,6 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker'
 import { PuppeteerBlocker } from '@cliqz/adblocker-puppeteer'
 import fetch from 'cross-fetch'
-import { Status } from '../models/status.model.js'
 import { Job } from '../models/job.model.js'
 
 export async function crawlUpworkJobs () {
@@ -85,11 +84,10 @@ export async function crawlUpworkJobs () {
     await Job.insertMany(crawledJobs)
     console.log(`successfully crawled at ${new Date()}`)
 
+    await page.close()
     await browser.close()
 
     const crawledJobsNumber = crawledJobs.length
-
-    await Status.findOneAndUpdate({ portal: 'upwork' }, { numberOfCrawledJobs: crawledJobsNumber })
 
     await axios.post(`http://bot:${process.env.BOT_DOCKER_PORT}/api`, { crawled: crawledJobsNumber })
       .then(response => {

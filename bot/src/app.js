@@ -22,26 +22,31 @@ app.use(express.json())
 app.post('/api', async (request, response) => {
   const { crawled } = request.body
 
-  response.send('updated')
-  console.log(crawled)
+  if (crawled) {
+    response.send('updated')
+    console.log(crawled)
 
-  const Jobs = await Job.find().sort({ _id: -1 }).limit(crawled)
-  const Users = await User.find()
+    const Jobs = await Job.find().sort({ _id: -1 }).limit(crawled)
+    const Users = await User.find()
 
-  for (const user of Users) {
-    for (const job of Jobs) {
-      const jobKeywords = job.description.split(' ').concat(job.title.toLowerCase().split(' '))
+    for (const user of Users) {
+      for (const job of Jobs) {
+        const jobKeywords = job.description.split(' ').concat(job.title.toLowerCase().split(' '))
 
-      if (user.keywords.some(keyword => jobKeywords.includes(keyword))) {
-        await bot.sendMessage(user.chatId, job.link).then(function (resp) {
-        }).catch(async function (error) {
-          if (error.response && error.response.statusCode === 403) {
-            const chatId = user.chatId
-            await User.deleteOne({ chatId })
-          }
-        })
+        if (user.keywords.some(keyword => jobKeywords.includes(keyword))) {
+          await bot.sendMessage(user.chatId, job.link).then(function (resp) {
+          }).catch(async function (error) {
+            if (error.response && error.response.statusCode === 403) {
+              const chatId = user.chatId
+              await User.deleteOne({ chatId })
+            }
+          })
+        }
       }
     }
+  } else {
+    response.send('skipped')
+    console.log('crawled is 0, API call skipped')
   }
 })
 
