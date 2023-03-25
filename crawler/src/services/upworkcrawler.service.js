@@ -13,7 +13,14 @@ export async function crawlUpworkJobs () {
     puppeteer.use(AdblockerPlugin({ blockTrackers: true }))
 
     const browser = await puppeteer.launch({
-      args: ['--disable-gpu', '--disable-dev-shm-usage', '--disable-setuid-sandbox', '--no-sandbox']
+      args: ['--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-gpu']
     })
 
     const page = await browser.newPage()
@@ -77,6 +84,7 @@ export async function crawlUpworkJobs () {
           }
 
           crawledJobs.push(jobObject)
+
         } else { console.log('Skipped') }
       }
     }
