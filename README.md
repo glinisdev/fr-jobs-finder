@@ -16,3 +16,5 @@ The bot service then retrieves the number of new job postings from the database 
 To make deployment easier, the entire application is packaged into a docker compose file.
 
 You can currently access the Freelance Finder bot on Telegram at https://t.me/freelance_finder_bot.
+
+Explore my article dedicated to this repo: https://codingwithgeorge.com/how-to-build-dockerized-telegram-bot-with-node-js-puppeteer-and-mongodb/
