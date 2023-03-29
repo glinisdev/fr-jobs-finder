@@ -2,14 +2,14 @@ version: "3.8"
 
 services:
   mongodb:
-    image: mongo:5.0.2
+    image: mongo:6.0.0
     restart: unless-stopped
     env_file: ./.env
     environment:
       - MONGO_INITDB_ROOT_USERNAME=$MONGODB_USER
       - MONGO_INITDB_ROOT_PASSWORD=$MONGODB_PASSWORD
     ports:
-      - $MONGODB_LOCAL_PORT:$MONGODB_DOCKER_PORT
+      - 127.0.0.1:$MONGODB_LOCAL_PORT:$MONGODB_DOCKER_PORT
     volumes:
       - db:/data/db
   crawler:
